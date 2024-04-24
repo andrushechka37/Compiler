@@ -4,9 +4,9 @@
 #include <cstring>
 
 
-static bool check_symbol(char symbol, FILE * pfile);
+bool check_symbol(char symbol, FILE * pfile);
 int build_tree(elem_ptr * element, FILE * in_file, elem_ptr * parent);
-static void set_type_value(diff_tree_element * element, double number, types_of_node type);
+void set_type_value(diff_tree_element * element, double number, types_of_node type);
 
 const int LABELS_QUANTITY = 10;
 variables_info variables_table;
@@ -33,7 +33,7 @@ static int get_free_label(int labels[]) {
     return 999;
 }
 
-static bool check_symbol(char symbol, FILE * pfile) {
+bool check_symbol(char symbol, FILE * pfile) {
 
     bool is_found = 1;
     char check_char = getc(pfile);
@@ -150,7 +150,7 @@ int build_tree(elem_ptr * element, FILE * in_file, elem_ptr * parent) {
     }
 }
 
-static void set_type_value(diff_tree_element * element, double number, types_of_node type) {
+void set_type_value(diff_tree_element * element, double number, types_of_node type) {
 
     if (type == variable_class || type == value_class || type == function_class) {
         element->value.number = number;

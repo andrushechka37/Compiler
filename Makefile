@@ -1,14 +1,20 @@
-.PHONY: compile
-
-start: tree.o compiler.o
-	clang++ tree.o compiler.o -o comp && ./comp
-
-hashtree_table.o: tree.h tree.cpp
-	clang++ -c tree.cpp
-
-hash_func.o: compiler.cpp tree.h
-	clang++ -c compiler.cpp
 
 
+CCX = clang++
+TARGET = compile
+
+SRC_FOLDER = ./src/
+OBJ_FOLDER = ./obj/
+
+SRC = $(wildcard *.cpp)
+OBJ = $(patsubst %.cpp, %.o, $(SRC))
+
+
+
+$(TARGET): $(OBJ)
+	$(CCX) $(OBJ) -o $(TARGET) && ./$(TARGET)
+
+%.o: %.c 
+	$(CCX) -c $< -o $@
 clean:
-	rm -rf *.o graph.dot comp
+	rm -rf *.o graph.dot $(TARGET)
