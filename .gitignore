@@ -1,1 +1,7 @@
 CringeLanguage
+graphs
+comp
+*.o
+graph.dot
+in_program.txt
+.vscode
