@@ -6,7 +6,6 @@
 #include <math.h>
 
 
-static bool check_symbol(char symbol, FILE * pfile);
 static int set_type_and_value(double value, types_of_node type, diff_tree_element * element);
 
 // TODO(DONE): This are lexems, not operators
@@ -326,3 +325,17 @@ void create_new_graph(void) {  // not tmp files, but better than previous hardco
     system(command1);
     graph_number++;
 }
+
+
+
+
+
+
+
+
+
+
+// --------------------------------------------------------------------------------------------
+
+
+

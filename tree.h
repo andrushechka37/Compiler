@@ -218,3 +218,12 @@ struct variables_info {
     } else {                                          \
         set_type_value(*element, func, operator_class);   \
     }
+
+
+
+
+bool check_symbol(char symbol, FILE * pfile);
+int build_tree(elem_ptr * element, FILE * in_file, elem_ptr * parent);
+void set_type_value(diff_tree_element * element, double number, types_of_node type);
+
+

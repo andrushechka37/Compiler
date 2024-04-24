@@ -12,9 +12,9 @@ OBJ = $(patsubst %.cpp, %.o, $(SRC))
 
 
 $(TARGET): $(OBJ)
-	$(CCX) $(OBJ) -o $(TARGET) && ./$(TARGET)
+	$(CCX) $(OBJ) -v -o $(TARGET) && ./$(TARGET)
 
 %.o: %.c 
-	$(CCX) -c $< -o $@
+	$(CCX) -v -c $< -o $@
 clean:
 	rm -rf *.o graph.dot $(TARGET)
