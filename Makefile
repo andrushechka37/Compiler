@@ -14,7 +14,7 @@ OBJ = $(patsubst %.cpp, %.o, $(SRC))
 $(TARGET): $(OBJ)
 	$(CCX) $(OBJ) -v -o $(TARGET) && ./$(TARGET)
 
-%.o: %.c 
+%.o: %.c %.h
 	$(CCX) -v -c $< -o $@
 clean:
-	rm -rf *.o graph.dot $(TARGET)
+	rm -rf *.o graph.dot $(TARGET) asm.txt

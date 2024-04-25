@@ -1,13 +1,14 @@
 #include "read_to_tree.h"
+
 #include <cstring>
 
 
-static int take_free_label(int labels[], int number_of_taken_label) {
+int take_free_label(int labels[], int number_of_taken_label) {
     labels[number_of_taken_label] = 1;
     return 0;
 }
 
-static int get_free_label(int labels[]) {
+int get_free_label(int labels[]) {
 
     for (int i = 0; i < LABELS_QUANTITY; i++) {
 
@@ -150,3 +151,176 @@ void set_type_value(diff_tree_element * element, double number, types_of_node ty
     element->type = type;
 }
 
+// ------------------------------------------------------
+
+
+void print_single_command(diff_tree_element * element, FILE * pfile, diff_tree_element * funcs[], int labels[]) {
+
+    if (element == NULL) {
+        return;
+    }
+
+    if (ELEM_OP_ARG == 2) {
+
+        print_single_command(element->left, pfile, funcs, labels);
+        print_single_command(element->right, pfile, funcs, labels);
+
+        switch (ELEM_OP_NUM) {
+
+            ARG_CASES(OP_ADD, "add\n");
+            ARG_CASES(OP_SUB, "sub\n");
+            ARG_CASES(OP_MUL, "mul\n");
+            ARG_CASES(OP_DIV, "div\n");
+
+            END_OF_SWITCH;
+        }
+
+    } else if (ELEM_OP_ARG == 1) {
+
+        print_single_command(element->right, pfile, funcs, labels);
+
+        switch (ELEM_OP_NUM) {
+
+            ARG_CASES(OP_SIN, "sin\n");
+            ARG_CASES(OP_COS, "cos\n");
+            ARG_CASES(OP_SQRT, "sqrt\n");
+            
+            END_OF_SWITCH;
+        }
+
+    } else {
+        
+        if (ELEM_TYPE == value_class) {
+
+            fprintf(pfile, "push %d\n", (int)ELEM_DOUBLE);
+
+        } else if (ELEM_TYPE == variable_class) {
+
+            if (IS_ELEM(element->parent, syntax_class, OP_EQUAL) & !IS_ELEM(element->parent->parent, syntax_class, OP_IF)
+                                                             & !IS_ELEM(element->parent->parent, syntax_class, OP_WHILE)) {
+
+                fprintf(pfile, "pop r%cx\n", (int)ELEM_DOUBLE + 'a');
+            } else {
+                fprintf(pfile, "push r%cx\n", (int)ELEM_DOUBLE + 'a'); // pop or push think
+            }
+
+        } else if (ELEM_TYPE == function_class) {
+
+            if (element->right == NULL) {
+                fprintf(pfile, "call :%lg\n", element->value.number);
+            } else {
+                funcs[(int)element->value.number] = element->right;
+            }
+
+        } else {
+
+            if (ELEM_OP_NUM == OP_END) {
+
+                print_single_command(element->left, pfile, funcs, labels);
+                print_single_command(element->right, pfile, funcs, labels);
+
+            } else if (ELEM_OP_NUM == OP_EQUAL) {
+
+                print_single_command(element->right, pfile, funcs, labels);
+                print_single_command(element->left, pfile, funcs, labels);
+                
+            } else if (ELEM_OP_NUM == OP_WHILE) {
+
+                int begin = get_free_label(labels);
+                int end = get_free_label(labels);
+
+                fprintf(pfile, ":%d\n", begin);
+                
+                print_single_command(element->left, pfile, funcs, labels);
+
+                switch (element->left->value.operator_info.op_number) {
+
+                IF_CASES(OP_EQUAL, "jne :%d\n");    // are changed to opposite commands,
+                IF_CASES(OP_MORE,  "jbe :%d\n");    // because jump happens in opposite case
+                IF_CASES(OP_LESS,  "jae :%d\n"); 
+                IF_CASES(OP_NEQUAL, "je :%d\n"); 
+
+                default:
+                    printf("unknown arg - %d, 985698!!!!!!!\n", element->left->value.operator_info.op_number);
+                    break;
+                }
+
+                print_single_command(element->right, pfile, funcs, labels);
+
+                fprintf(pfile, "jmp :%d\n", begin);
+                fprintf(pfile, ":%d\n", get_free_label(labels));
+                
+            } else if (ELEM_OP_NUM == OP_IF ){
+
+                int end = get_free_label(labels);
+                
+                print_single_command(element->left->left, pfile, funcs, labels);
+                print_single_command(element->left->right, pfile, funcs, labels);
+
+                switch (element->left->value.operator_info.op_number) {
+
+                IF_CASES(OP_EQUAL, "jne :%d\n");    // are changed to opposite commands,
+                IF_CASES(OP_MORE,  "jbe :%d\n");    // because jump happens in opposite case
+                IF_CASES(OP_LESS,  "jae :%d\n"); 
+                IF_CASES(OP_NEQUAL, "je :%d\n"); 
+                
+                default:
+                    printf("unknown arg - %d, 985698!!!!!!!\n", element->left->value.operator_info.op_number);
+                    break;
+                }
+
+                print_single_command(element->right, pfile, funcs, labels);
+
+                fprintf(pfile, ":%d\n", end);
+                
+            } else if (ELEM_OP_NUM == OP_PRINT) {
+
+                print_single_command(element->right, pfile, funcs, labels);
+                fprintf(pfile, "out\n");
+
+            } else if (ELEM_OP_NUM == OP_RET) {
+
+                fprintf(pfile, "ret\n");
+
+            } else {
+                printf("unknown arg in print single command\n");
+            }
+        }
+    }
+}
+
+#define print(str, ...) fprintf(pfile, str)
+// va_list
+// "%d djkjg", rt
+
+void print_asm_code(diff_tree_element * element) {
+
+    FILE * pfile = fopen("asm.txt", "w");
+    if (pfile == NULL) {
+        printf("null ptr pfile");
+        return;
+    }
+
+    const int FUNCS_QUANTITY = 20;
+    const int LABELS_QUANTITY = 10;
+
+    diff_tree_element * funcs[FUNCS_QUANTITY] = {};
+    int * labels = labels_global;
+
+    print_single_command(element, pfile, funcs, labels);
+
+    fprintf(pfile, "hlt\n");
+
+    for (int i = 0; i < FUNCS_QUANTITY; i++) {
+
+        if (funcs[i] != NULL) {
+            
+            fprintf(pfile, "\n\n\n:%d\n", i);
+            print_single_command(funcs[i], pfile, funcs, labels);
+            fprintf(pfile, "ret\n\n\n\n");
+        }
+    }
+
+    fclose(pfile);
+    return;
+}
