@@ -1,20 +1,17 @@
 
+.PHONY: compile
 
-CCX = clang++
-TARGET = compile
+start: tree.o compiler.o read_to_tree.o
+	g++ tree.o compiler.o read_to_tree.o -g -o compiler && ./compiler
 
-SRC_FOLDER = ./src/
-OBJ_FOLDER = ./obj/
+tree.o: tree.h tree.cpp
+	g++ -g -c tree.cpp
 
-SRC = $(wildcard *.cpp)
-OBJ = $(patsubst %.cpp, %.o, $(SRC))
+hash_func.o: compiler.cpp tree.h
+	g++ -g -c compiler.cpp
 
+read_to_tree.o: read_to_tree.cpp read_to_tree.h
+	g++ -g -c read_to_tree.cpp
 
-
-$(TARGET): $(OBJ)
-	$(CCX) $(OBJ) -v -o $(TARGET) && ./$(TARGET)
-
-%.o: %.c %.h
-	$(CCX) -v -c $< -o $@
 clean:
-	rm -rf *.o graph.dot $(TARGET) asm.txt
+	rm -rf *.o graph.dot compiler asm.txt

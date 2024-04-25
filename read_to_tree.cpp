@@ -1,7 +1,8 @@
 #include "read_to_tree.h"
-
 #include <cstring>
 
+bool check_symbol(char symbol, FILE * pfile);
+void set_type_value(diff_tree_element * element, double number, types_of_node type);
 
 int take_free_label(int labels[], int number_of_taken_label) {
     labels[number_of_taken_label] = 1;
@@ -154,7 +155,7 @@ void set_type_value(diff_tree_element * element, double number, types_of_node ty
 // ------------------------------------------------------
 
 
-void print_single_command(diff_tree_element * element, FILE * pfile, diff_tree_element * funcs[], int labels[]) {
+void print_single(diff_tree_element * element, FILE * pfile, diff_tree_element * funcs[], int labels[]) {
 
     if (element == NULL) {
         return;
@@ -162,8 +163,8 @@ void print_single_command(diff_tree_element * element, FILE * pfile, diff_tree_e
 
     if (ELEM_OP_ARG == 2) {
 
-        print_single_command(element->left, pfile, funcs, labels);
-        print_single_command(element->right, pfile, funcs, labels);
+        print_single(element->left, pfile, funcs, labels);
+        print_single(element->right, pfile, funcs, labels);
 
         switch (ELEM_OP_NUM) {
 
@@ -177,7 +178,7 @@ void print_single_command(diff_tree_element * element, FILE * pfile, diff_tree_e
 
     } else if (ELEM_OP_ARG == 1) {
 
-        print_single_command(element->right, pfile, funcs, labels);
+        print_single(element->right, pfile, funcs, labels);
 
         switch (ELEM_OP_NUM) {
 
@@ -216,13 +217,13 @@ void print_single_command(diff_tree_element * element, FILE * pfile, diff_tree_e
 
             if (ELEM_OP_NUM == OP_END) {
 
-                print_single_command(element->left, pfile, funcs, labels);
-                print_single_command(element->right, pfile, funcs, labels);
+                print_single(element->left, pfile, funcs, labels);
+                print_single(element->right, pfile, funcs, labels);
 
             } else if (ELEM_OP_NUM == OP_EQUAL) {
 
-                print_single_command(element->right, pfile, funcs, labels);
-                print_single_command(element->left, pfile, funcs, labels);
+                print_single(element->right, pfile, funcs, labels);
+                print_single(element->left, pfile, funcs, labels);
                 
             } else if (ELEM_OP_NUM == OP_WHILE) {
 
@@ -231,7 +232,7 @@ void print_single_command(diff_tree_element * element, FILE * pfile, diff_tree_e
 
                 fprintf(pfile, ":%d\n", begin);
                 
-                print_single_command(element->left, pfile, funcs, labels);
+                print_single(element->left, pfile, funcs, labels);
 
                 switch (element->left->value.operator_info.op_number) {
 
@@ -245,7 +246,7 @@ void print_single_command(diff_tree_element * element, FILE * pfile, diff_tree_e
                     break;
                 }
 
-                print_single_command(element->right, pfile, funcs, labels);
+                print_single(element->right, pfile, funcs, labels);
 
                 fprintf(pfile, "jmp :%d\n", begin);
                 fprintf(pfile, ":%d\n", get_free_label(labels));
@@ -254,8 +255,8 @@ void print_single_command(diff_tree_element * element, FILE * pfile, diff_tree_e
 
                 int end = get_free_label(labels);
                 
-                print_single_command(element->left->left, pfile, funcs, labels);
-                print_single_command(element->left->right, pfile, funcs, labels);
+                print_single(element->left->left, pfile, funcs, labels);
+                print_single(element->left->right, pfile, funcs, labels);
 
                 switch (element->left->value.operator_info.op_number) {
 
@@ -269,13 +270,13 @@ void print_single_command(diff_tree_element * element, FILE * pfile, diff_tree_e
                     break;
                 }
 
-                print_single_command(element->right, pfile, funcs, labels);
+                print_single(element->right, pfile, funcs, labels);
 
                 fprintf(pfile, ":%d\n", end);
                 
             } else if (ELEM_OP_NUM == OP_PRINT) {
 
-                print_single_command(element->right, pfile, funcs, labels);
+                print_single(element->right, pfile, funcs, labels);
                 fprintf(pfile, "out\n");
 
             } else if (ELEM_OP_NUM == OP_RET) {
@@ -307,7 +308,7 @@ void print_asm_code(diff_tree_element * element) {
     diff_tree_element * funcs[FUNCS_QUANTITY] = {};
     int * labels = labels_global;
 
-    print_single_command(element, pfile, funcs, labels);
+    print_single(element, pfile, funcs, labels);
 
     fprintf(pfile, "hlt\n");
 
@@ -316,7 +317,7 @@ void print_asm_code(diff_tree_element * element) {
         if (funcs[i] != NULL) {
             
             fprintf(pfile, "\n\n\n:%d\n", i);
-            print_single_command(funcs[i], pfile, funcs, labels);
+            print_single(funcs[i], pfile, funcs, labels);
             fprintf(pfile, "ret\n\n\n\n");
         }
     }

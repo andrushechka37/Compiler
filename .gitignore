@@ -1,7 +1,9 @@
 CringeLanguage
 graphs
-comp
+compile
 *.o
 graph.dot
 in_program.txt
 .vscode
+compile_commands.json
+.cache

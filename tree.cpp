@@ -32,6 +32,7 @@ lexem_names_numbers_class lexems_names_numbers[OP_COUNT] = {
         {OP_PRINT,"print",       0},
         {OP_RET,    "ret",       0},
         {OP_NEQUAL,   "!",       0},
+        {OP_MOVE,   "move",       0},
 };
 
 int is_one_char_symbol(char name) {
