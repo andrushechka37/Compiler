@@ -5,22 +5,31 @@
 #include "read_to_tree.h"
 #include "compiler.h"
 
+// TODO: print single better
+// TODO: better dump with names
 
-#define two_arg_switch(num)                                 \
-    case num:                                               \
-        IR_array.data[IR_array.size].op_number = num;       \
-        IR_array.data[IR_array.size].type = operator_class; \
-        IR_array.size++;                                    \
+
+#define two_arg_switch(num)                                    \
+    case num:                                                  \
+        IR_array->data[IR_array->size].op_number = num;        \
+        IR_array->data[IR_array->size].type = operator_class;  \
+        IR_array->size++;                                      \
         break;
 
-                              
 
+#define IS_NULL(element)      \
+    if (element == NULL) {    \
+        return;               \
+    }                         
 
-void print_struct(diff_tree_element * element, IR_elements IR_array) {
+#define SET_IR_ELEM(IR_type, IR_number)                             \
+    IR_array->data[IR_array->size].op_number = IR_number;           \
+    IR_array->data[IR_array->size].type = IR_type;                  \
+    IR_array->size++;   
 
-    if (element == NULL) {
-        return;
-    }
+void print_struct(diff_tree_element * element, IR_elements * IR_array) {
+
+    IS_NULL(element);
 
     if (ELEM_OP_ARG == 2) {
 
@@ -39,36 +48,30 @@ void print_struct(diff_tree_element * element, IR_elements IR_array) {
 
     } else if (ELEM_OP_ARG == 1) {
 
-        IR_array.data[IR_array.size].op_number = OP_SQRT;  
-        IR_array.data[IR_array.size].type = operator_class;
-        IR_array.size++;   
+        SET_IR_ELEM(operator_class, OP_SQRT);
 
     } else {
         
         if (ELEM_TYPE == value_class) {
 
-            IR_array.data[IR_array.size].number = (int)ELEM_DOUBLE;
-            IR_array.data[IR_array.size].type = value_class;
-            IR_array.size++;  
+            SET_IR_ELEM(value_class, (int)ELEM_DOUBLE);
 
         } else if (ELEM_TYPE == variable_class) {
 
-                IR_array.data[IR_array.size].number = (int)ELEM_DOUBLE;       
-                IR_array.data[IR_array.size].type = variable_class; 
-                IR_array.size++;   
+            SET_IR_ELEM(variable_class, (int)ELEM_DOUBLE);
 
         } else if (ELEM_OP_NUM == OP_EQUAL) {
 
-            if (!IS_ELEM(element->parent->parent, syntax_class, OP_IF) & !IS_ELEM(element->parent->parent, syntax_class, OP_WHILE)) {
+            print_struct(element->right, IR_array);
+            print_struct(element->left, IR_array);
 
-                IR_array.data[IR_array.size].op_number = OP_MOVE;       
-                IR_array.data[IR_array.size].type = syntax_class; 
-                IR_array.size++;                                    
+            if (!IS_ELEM(element->parent, syntax_class, OP_IF) & !IS_ELEM(element->parent, syntax_class, OP_WHILE)) {
+
+                 SET_IR_ELEM(syntax_class, OP_MOVE);                            
             
             } else {
-                IR_array.data[IR_array.size].op_number = OP_EQUAL;       
-                IR_array.data[IR_array.size].type = syntax_class; 
-                IR_array.size++; 
+
+                SET_IR_ELEM(syntax_class, OP_EQUAL);
             }
         } else if (ELEM_TYPE == function_class) {
 
@@ -80,44 +83,31 @@ void print_struct(diff_tree_element * element, IR_elements IR_array) {
 
         } else {
 
-            if (ELEM_OP_NUM == OP_END) {
+            switch (ELEM_OP_NUM) {
 
-                print_struct(element->left, IR_array);
-                print_struct(element->right, IR_array);
+                case OP_END:
+                    print_struct(element->left, IR_array);
+                    print_struct(element->right, IR_array);
+                    break;
 
-            } else if (ELEM_OP_NUM == OP_EQUAL) {
+                case OP_WHILE:
+                    SET_IR_ELEM(syntax_class, OP_WHILE);
+                    break;
 
-                print_struct(element->right, IR_array);
-                print_struct(element->left, IR_array);
+                case OP_IF:
+                    SET_IR_ELEM(syntax_class, OP_IF);
+                    break;
                 
-            } else if (ELEM_OP_NUM == OP_WHILE) {
-
-                IR_array.data[IR_array.size].op_number = OP_WHILE;  
-                IR_array.data[IR_array.size].type = syntax_class;
-                IR_array.size++;   
+                case OP_PRINT:
+                    SET_IR_ELEM(syntax_class, OP_PRINT);
+                    break;
                 
-            } else if (ELEM_OP_NUM == OP_IF ){
+                case OP_RET:
+                    SET_IR_ELEM(syntax_class, OP_RET);
+                    break;
 
-                IR_array.data[IR_array.size].op_number = OP_IF;  
-                IR_array.data[IR_array.size].type = syntax_class;
-                IR_array.size++;   
-
-                
-            } else if (ELEM_OP_NUM == OP_PRINT) {
-
-                IR_array.data[IR_array.size].op_number = OP_PRINT;  
-                IR_array.data[IR_array.size].type = syntax_class;
-                IR_array.size++;   
-
-
-            } else if (ELEM_OP_NUM == OP_RET) {
-
-                IR_array.data[IR_array.size].op_number = OP_RET;  
-                IR_array.data[IR_array.size].type = syntax_class;
-                IR_array.size++;   
-
-            } else {
-                printf("unknown arg in print single command\n");
+                default:
+                    printf("unknown arg in print single command\n");
             }
         }
     }
@@ -126,7 +116,7 @@ void print_struct(diff_tree_element * element, IR_elements IR_array) {
 void dump_IR(IR_elements IR_array[]) {
     FILE * pfile = fopen("IR_log.txt", "w");
     for (int i = 0; i < IR_array->size; i++) {
-        fprintf(pfile, "%d | %d | %d | %d\n", IR_array->data[i].number, IR_array->data[i].op_number, IR_array->data[i].type);
+        fprintf(pfile, "%d | %d | %d | %d\n", IR_array->data[i].op_number, IR_array->data[i].op_number, IR_array->data[i].type);
     }
     fclose(pfile);
 }
@@ -136,9 +126,9 @@ void dump_IR(IR_elements IR_array[]) {
 int main() {
     variables_table.size = 0;
     diff_tree_element * tree = read_tree();
-    // IR_elements IR_array = {};
-    // print_struct(tree, IR_array);
-    // dump_IR(&IR_array);
+    IR_elements IR_array = {};
+    print_struct(tree, &IR_array);
+    dump_IR(&IR_array);
 
     
 

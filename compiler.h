@@ -4,8 +4,7 @@
 
 const int IR_element_len = 100;
 struct IR_element {
-    operations op_number;
-    int number;
+    int op_number;
     types_of_node type;
 };
 
