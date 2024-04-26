@@ -26,13 +26,13 @@ lexem_names_numbers_class lexems_names_numbers[OP_COUNT] = {
         {OP_WHILE,"while",       0},
         {OP_MORE,     ">",       0},
         {OP_LESS,     "<",       0},
-        {OP_EQUAL,    "=",       0},
+        {OP_EQUAL,    "=",       2},
         {OP_END,      ";",       0},
         {OP_FUNC,     "$",       0},
         {OP_PRINT,"print",       0},
         {OP_RET,    "ret",       0},
         {OP_NEQUAL,   "!",       0},
-        {OP_MOVE,   "move",       0},
+        {OP_MOVE,   "move",       2},
 };
 
 int is_one_char_symbol(char name) {
@@ -75,6 +75,7 @@ diff_tree_element * node_ctor(double value, types_of_node type, diff_tree_elemen
 
         case syntax_class:
             ELEM_OP_NUM = (operations) value;
+            element->value.operator_info.arg_quantity = get_op_arg_number((operations) value);
             break;
         
         case variable_class:
@@ -249,9 +250,9 @@ static void print_graph_arrows(diff_tree_element * element, FILE * pfile) {
 static void print_graph_node(diff_tree_element * element, FILE * pfile, int rank) {
     if (hard_visualize == 1) {                              // i know copypast, but i thuink it is not critical,
         fprintf(pfile, "\t%d[shape=Mrecord,style=filled, fillcolor=\"#7293ba\", rank = %d,"  // it is for better understanding
-                   "label=\"{parent: %p | name: %p | {value: %.2lf | type: %d} | {left: %p | right: %p}}\"];\n", 
-                   element, rank, element->parent, element, element->value, 
-                 element->type, element->left, element->right);
+                   "label=\"{parent: %p | name: %p | {value: %.2lf | type: %d | arg %d} | {left: %p | right: %p}}\"];\n", 
+                   element, rank, element->parent, element, element->value.number, 
+                 element->type, element->value.operator_info.arg_quantity, element->left, element->right);
     } else {                                         // ifndef
         if (element->type == value_class) {
 

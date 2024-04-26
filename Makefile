@@ -2,12 +2,12 @@
 .PHONY: compile
 
 start: tree.o compiler.o read_to_tree.o
-	g++ tree.o compiler.o read_to_tree.o -g -o compiler && ./compiler
+	g++ tree.o compiler.o read_to_tree.o -o compiler && ./compiler
 
 tree.o: tree.h tree.cpp
 	g++ -g -c tree.cpp
 
-hash_func.o: compiler.cpp tree.h
+compiler.o: compiler.cpp tree.h
 	g++ -g -c compiler.cpp
 
 read_to_tree.o: read_to_tree.cpp read_to_tree.h

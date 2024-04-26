@@ -163,8 +163,18 @@ void print_single(diff_tree_element * element, FILE * pfile, diff_tree_element *
 
     if (ELEM_OP_ARG == 2) {
 
+        if (ELEM_OP_NUM == OP_EQUAL) {
+
+            print_single(element->right, pfile, funcs, labels);
+            print_single(element->left, pfile, funcs, labels);
+            return;
+        } 
+
         print_single(element->left, pfile, funcs, labels);
         print_single(element->right, pfile, funcs, labels);
+
+
+        
 
         switch (ELEM_OP_NUM) {
 
@@ -220,11 +230,6 @@ void print_single(diff_tree_element * element, FILE * pfile, diff_tree_element *
                 print_single(element->left, pfile, funcs, labels);
                 print_single(element->right, pfile, funcs, labels);
 
-            } else if (ELEM_OP_NUM == OP_EQUAL) {
-
-                print_single(element->right, pfile, funcs, labels);
-                print_single(element->left, pfile, funcs, labels);
-                
             } else if (ELEM_OP_NUM == OP_WHILE) {
 
                 int begin = get_free_label(labels);
