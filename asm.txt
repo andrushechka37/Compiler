@@ -1,5 +1,0 @@
-push 9
-push 7
-add
-pop rax
-hlt

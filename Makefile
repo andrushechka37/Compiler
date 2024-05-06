@@ -20,7 +20,7 @@ $(OBJ)read_to_tree.o: $(SRC)read_to_tree.cpp $(INCLUDE)read_to_tree.h
 	$(CC) -g -c $(SRC)read_to_tree.cpp -o $(OBJ)read_to_tree.o
 
 clean:
-	rm -rf $(OBJ)*.o graph.dot $(TARGET) asm.txt
+	rm -rf $(OBJ)*.o graph.dot $(TARGET) asm.txt IR_log.txt
 
 
 # // -x - синтаксис языка
