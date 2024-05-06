@@ -15,3 +15,8 @@ read_to_tree.o: read_to_tree.cpp read_to_tree.h
 
 clean:
 	rm -rf *.o graph.dot compiler asm.txt
+
+
+# // -x - синтаксис языка
+# // -m - куда кодоген
+# // -S - текст асма

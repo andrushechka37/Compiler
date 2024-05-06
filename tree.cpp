@@ -248,6 +248,7 @@ static void print_graph_arrows(diff_tree_element * element, FILE * pfile) {
 }
 
 static void print_graph_node(diff_tree_element * element, FILE * pfile, int rank) {
+
     if (hard_visualize == 1) {                              // i know copypast, but i thuink it is not critical,
         fprintf(pfile, "\t%d[shape=Mrecord,style=filled, fillcolor=\"#7293ba\", rank = %d,"  // it is for better understanding
                    "label=\"{parent: %p | name: %p | {value: %.2lf | type: %d | arg %d} | {left: %p | right: %p}}\"];\n", 

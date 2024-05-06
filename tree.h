@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdio>
 
-#define hard_visualize 1
+#define hard_visualize 0
 
 inline int graph_number = 1;
 const int command_len = 1000;

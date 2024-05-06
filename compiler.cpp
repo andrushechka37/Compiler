@@ -1,4 +1,3 @@
-
 #include "tree.h"
 #include <cstdio>
 #include <cstring>
@@ -7,16 +6,25 @@
 
 // TODO: print single better
 // TODO: better dump with names
+// TODO: make func to set IR token 
+// TODO: IR dump more complex
+// TODO: make IR with list
+// TODO: comments when generate
 
+void set_IR_element(IR_elements * IR_array, types_of_node type, int num) {
+
+    IR_array->data[IR_array->size].op_number = num;        
+    IR_array->data[IR_array->size].type = type;  
+    IR_array->size++;    
+    return;
+}
 
 #define two_arg_switch(num)                                    \
     case num:                                                  \
-        print_struct(element->left, IR_array);                 \
-        print_struct(element->right, IR_array);                \
+        set_IR(element->left, IR_array);                       \
+        set_IR(element->right, IR_array);                      \
                                                                \
-        IR_array->data[IR_array->size].op_number = num;        \
-        IR_array->data[IR_array->size].type = operator_class;  \
-        IR_array->size++;                                      \
+        set_IR_element(IR_array, operator_class, num);         \
         break;
 
 
@@ -25,14 +33,14 @@
         return;               \
     }                         
 
-#define SET_IR_ELEM(IR_type, IR_number)                             \
-    IR_array->data[IR_array->size].op_number = IR_number;           \
-    IR_array->data[IR_array->size].type = IR_type;                  \
-    IR_array->size++;   
+// #define SET_IR_ELEM(IR_type, IR_number)                             \
+//     IR_array->data[IR_array->size].op_number = IR_number;           \
+//     IR_array->data[IR_array->size].type = IR_type;                  \
+//     IR_array->size++;   
 
 
 
-void print_struct(diff_tree_element * element, IR_elements * IR_array) {
+void set_IR(diff_tree_element * element, IR_elements * IR_array) {
 
     IS_NULL(element);
 
@@ -46,13 +54,13 @@ void print_struct(diff_tree_element * element, IR_elements * IR_array) {
             two_arg_switch(OP_DIV);
 
             case OP_EQUAL:
-                print_struct(element->right, IR_array);
-                print_struct(element->left,  IR_array);
+                set_IR(element->right, IR_array);
+                set_IR(element->left,  IR_array);
 
                 if (!IS_ELEM(element->parent, syntax_class, OP_IF) && !IS_ELEM(element->parent, syntax_class, OP_WHILE)) {
-                    SET_IR_ELEM(syntax_class, OP_MOVE);                            
+                    set_IR_element(IR_array, syntax_class, OP_MOVE);                           
                 } else {
-                    SET_IR_ELEM(syntax_class, OP_EQUAL);
+                    set_IR_element(IR_array, syntax_class, OP_EQUAL);
                 }
                 break;
 
@@ -61,19 +69,19 @@ void print_struct(diff_tree_element * element, IR_elements * IR_array) {
 
     } else if (ELEM_OP_ARG == 1) {
 
-        print_struct(element->right, IR_array);
-        SET_IR_ELEM(operator_class, OP_SQRT);
+        set_IR(element->right, IR_array);
+        set_IR_element(IR_array, operator_class, OP_SQRT);
 
     } else {
 
         switch (ELEM_TYPE) {
 
             case value_class:
-                SET_IR_ELEM(value_class, (int)ELEM_DOUBLE);
+                set_IR_element(IR_array, value_class, (int)ELEM_DOUBLE);
                 break;
 
             case variable_class:
-                SET_IR_ELEM(variable_class, (int)ELEM_DOUBLE);
+                set_IR_element(IR_array, variable_class, (int)ELEM_DOUBLE);
                 break;
 
             case function_class:
@@ -85,24 +93,24 @@ void print_struct(diff_tree_element * element, IR_elements * IR_array) {
                 switch (ELEM_OP_NUM) {
 
                 case OP_END:
-                    print_struct(element->left, IR_array);
-                    print_struct(element->right, IR_array);
+                    set_IR(element->left, IR_array);
+                    set_IR(element->right, IR_array);
                     break;
 
                 case OP_WHILE:
-                    SET_IR_ELEM(syntax_class, OP_WHILE);
+                    set_IR_element(IR_array, syntax_class, OP_WHILE);
                     break;
 
                 case OP_IF:
-                    SET_IR_ELEM(syntax_class, OP_IF);
+                    set_IR_element(IR_array, syntax_class, OP_IF);
                     break;
                 
                 case OP_PRINT:
-                    SET_IR_ELEM(syntax_class, OP_PRINT);
+                    set_IR_element(IR_array, syntax_class, OP_PRINT);
                     break;
                 
                 case OP_RET:
-                    SET_IR_ELEM(syntax_class, OP_RET);
+                    set_IR_element(IR_array, syntax_class, OP_RET);
                     break;
 
                 default:
@@ -134,10 +142,8 @@ int main() {
     diff_tree_element * tree = read_tree();
     IR_elements IR_array = {};
     
-    print_struct(tree, &IR_array);
+    set_IR(tree, &IR_array);
     dump_IR(&IR_array);
-
-    
 
     tree_visualize(tree);
     print_asm_code(tree);
