@@ -1,4 +1,4 @@
-#include "read_to_tree.h"
+#include "../include/read_to_tree.h"
 #include <cstring>
 
 bool check_symbol(char symbol, FILE * pfile);

@@ -1,8 +1,8 @@
-#include "tree.h"
+#include "../include/tree.h"
 #include <cstdio>
 #include <cstring>
-#include "read_to_tree.h"
-#include "compiler.h"
+#include "../include/read_to_tree.h"
+#include "../include/compiler.h"
 
 // TODO: print single better
 // TODO: better dump with names
@@ -125,9 +125,9 @@ void dump_IR(IR_elements IR_array[]) {
     for (int i = 0; i < IR_array->size; i++) {
 
         if (IR_array->data[i].type != value_class && IR_array->data[i].type != variable_class) {
-            fprintf(pfile, "%s \n\n", get_op_symbol(IR_array->data[i].op_number), IR_array->data[i].type);
+            fprintf(pfile, "%s \n", get_op_symbol(IR_array->data[i].op_number), IR_array->data[i].type);
         } else if (IR_array->data[i].type == variable_class) {
-            fprintf(pfile, " %d variable \n", IR_array->data[i].op_number);
+            fprintf(pfile, " %d variable %s\n", IR_array->data[i].op_number, variables_table.table[IR_array->data[i].op_number].name);
         } else if (IR_array->data[i].type == value_class) {
             fprintf(pfile, " %d value \n", IR_array->data[i].op_number);
         }

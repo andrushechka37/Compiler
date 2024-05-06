@@ -8,3 +8,4 @@ in_program.txt
 compile_commands.json
 .cache
 IR_log.txt
+obj

@@ -1,20 +1,26 @@
+TARGET = compiler
+CC = g++
+
+OBJ = ./obj/
+SRC = ./src/
+INCLUDE = ./include/
 
 .PHONY: compile
 
-start: tree.o compiler.o read_to_tree.o
-	g++ tree.o compiler.o read_to_tree.o -o compiler && ./compiler
+start: $(OBJ)tree.o $(OBJ)compiler.o $(OBJ)read_to_tree.o
+	$(CC) $(OBJ)tree.o $(OBJ)compiler.o $(OBJ)read_to_tree.o -o $(TARGET) && ./$(TARGET)
 
-tree.o: tree.h tree.cpp
-	g++ -g -c tree.cpp
+$(OBJ)tree.o: $(INCLUDE)tree.h $(SRC)tree.cpp
+	$(CC) -g -c $(SRC)tree.cpp -o $(OBJ)tree.o
 
-compiler.o: compiler.cpp tree.h
-	g++ -g -c compiler.cpp
+$(OBJ)compiler.o: $(SRC)compiler.cpp $(INCLUDE)tree.h
+	$(CC) -g -c $(SRC)compiler.cpp -o $(OBJ)compiler.o
 
-read_to_tree.o: read_to_tree.cpp read_to_tree.h
-	g++ -g -c read_to_tree.cpp
+$(OBJ)read_to_tree.o: $(SRC)read_to_tree.cpp $(INCLUDE)read_to_tree.h
+	$(CC) -g -c $(SRC)read_to_tree.cpp -o $(OBJ)read_to_tree.o
 
 clean:
-	rm -rf *.o graph.dot compiler asm.txt
+	rm -rf $(OBJ)*.o graph.dot $(TARGET) asm.txt
 
 
 # // -x - синтаксис языка

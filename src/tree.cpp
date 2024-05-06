@@ -1,5 +1,5 @@
 // #include "../tree.h"
-#include "tree.h"
+#include "../include/tree.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
