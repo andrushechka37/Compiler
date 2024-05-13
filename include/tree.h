@@ -23,21 +23,13 @@ const int command_len = 1000;
 #define LESS(left, right) node_ctor(OP_LESS, syntax_class, left, right, NULL);
 #define MORE(left, right) node_ctor(OP_MORE, syntax_class, left, right, NULL);
 #define EQUAL(left, right) node_ctor(OP_EQUAL, syntax_class, left, right, NULL);
-
-
-
 #define NEQUAL(left, right) node_ctor(OP_NEQUAL, syntax_class, left, right, NULL);
-
 
 #define SIN(arg) node_ctor(OP_SIN, operator_class, NULL, arg, NULL)
 #define COS(arg) node_ctor(OP_COS, operator_class, NULL, arg, NULL)
 
 #define PRINT(arg) node_ctor(OP_PRINT, syntax_class, NULL, arg, NULL)
 
-
-#pragma once
-
-#include <cstddef>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc++17-extensions" // а таким нормально заниматься?
@@ -48,7 +40,7 @@ inline int error_status = 0;
 #pragma clang diagnostic pop
 
 const int OP_NAME_LEN = 50;
-const int OP_COUNT = 23;
+const int OP_COUNT = 25;
 const int FUNCS_COUNT = 22;
 const int OP_PRIORITY_MASK = 240;
 const char NIL = '_';
@@ -57,6 +49,7 @@ struct lexem_names_numbers_class {
     const double number;
     const char name[OP_NAME_LEN];
     const int arg_quantity;
+    const char X86_name[OP_NAME_LEN];
 };
 
 enum operations {
@@ -82,7 +75,9 @@ enum operations {
     OP_PRINT   = 64,
     OP_RET     = 65,
     OP_NEQUAL  = 65,
-    OP_MOVE    = 66
+    OP_MOVE    = 66,
+    OP_PUSH    = 67,
+    OP_POP     = 68,
 };
 
 struct op_info {
@@ -169,6 +164,7 @@ void tree_dtor(elem_ptr * root);
 
 const char * get_op_symbol(int op_num);          // maybe static
 int is_one_char_symbol(char name);
+const char * get_op_x86_name(int op_num);
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc++11-compat-deprecated-writable-strings"

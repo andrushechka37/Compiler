@@ -10,10 +10,10 @@ static int set_type_and_value(double value, types_of_node type, diff_tree_elemen
 
 // TODO(DONE): This are lexems, not operators
 lexem_names_numbers_class lexems_names_numbers[OP_COUNT] = {
-        {OP_ADD,      "+",       2},
-        {OP_SUB,      "-",       2},
-        {OP_MUL,      "*",       2},
-        {OP_DIV,      "/",       2},
+        {OP_ADD,      "+",       2, "add"},
+        {OP_SUB,      "-",       2, "sub"},
+        {OP_MUL,      "*",       2, "mul"},
+        {OP_DIV,      "/",       2, "div"},
         {OP_SQRT,  "sqrt",       1},
         {OP_SIN,    "sin",       1},
         {OP_COS,    "cos",       1},
@@ -30,9 +30,11 @@ lexem_names_numbers_class lexems_names_numbers[OP_COUNT] = {
         {OP_END,      ";",       0},
         {OP_FUNC,     "$",       0},
         {OP_PRINT,"print",       0},
-        {OP_RET,    "ret",       0},
+        {OP_RET,    "ret",       0, "ret"},
         {OP_NEQUAL,   "!",       0},
-        {OP_MOVE,   "move",       2},
+        {OP_MOVE,   "move",       2, "mov"},
+        {OP_PUSH,   "push",       1, "push"},
+        {OP_POP ,   "pop",       1, "pop"},
 };
 
 int is_one_char_symbol(char name) {
@@ -99,6 +101,13 @@ const char * get_op_symbol(int op_num) {
     int i = 0;
     while (op_num != lexems_names_numbers[i].number) i++;      // switch case
     return lexems_names_numbers[i].name;
+}
+
+
+const char * get_op_x86_name(int op_num) {
+    int i = 0;
+    while (op_num != lexems_names_numbers[i].number) i++;
+    return lexems_names_numbers[i].X86_name;
 }
 
 
