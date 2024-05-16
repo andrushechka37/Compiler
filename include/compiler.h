@@ -12,11 +12,13 @@ struct IR_element {
     int op_number;
     types_of_node type;
     IR_argument  first_arg;
-    IR_argument second_arg;
     int countity_of_arg = 0;
+    int label;
 };
 
 struct IR_elements {
     IR_element data[IR_element_len];
     int size;
 };
+
+void make_IR_array(diff_tree_element * element, IR_elements * IR_array);

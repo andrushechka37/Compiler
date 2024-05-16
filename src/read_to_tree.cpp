@@ -265,14 +265,14 @@ void print_single(diff_tree_element * element, FILE * pfile, diff_tree_element *
 
                 switch (element->left->value.operator_info.op_number) {
 
-                IF_CASES(OP_EQUAL, "jne :%d\n");    // are changed to opposite commands,
-                IF_CASES(OP_MORE,  "jbe :%d\n");    // because jump happens in opposite case
-                IF_CASES(OP_LESS,  "jae :%d\n"); 
-                IF_CASES(OP_NEQUAL, "je :%d\n"); 
+                    IF_CASES(OP_EQUAL, "jne :%d\n");    // are changed to opposite commands,
+                    IF_CASES(OP_MORE,  "jbe :%d\n");    // because jump happens in opposite case
+                    IF_CASES(OP_LESS,  "jae :%d\n"); 
+                    IF_CASES(OP_NEQUAL, "je :%d\n"); 
                 
-                default:
-                    printf("unknown arg - %d, 985698!!!!!!!\n", element->left->value.operator_info.op_number);
-                    break;
+                    default:
+                        printf("unknown arg - %d, 985698!!!!!!!\n", element->left->value.operator_info.op_number);
+                        break;
                 }
 
                 print_single(element->right, pfile, funcs, labels);

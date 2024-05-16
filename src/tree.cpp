@@ -1,4 +1,3 @@
-// #include "../tree.h"
 #include "../include/tree.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,7 +8,7 @@
 static int set_type_and_value(double value, types_of_node type, diff_tree_element * element);
 
 // TODO(DONE): This are lexems, not operators
-lexem_names_numbers_class lexems_names_numbers[OP_COUNT] = {
+const lexem_names_numbers_class lexems_names_numbers[OP_COUNT] = {
         {OP_ADD,      "+",       2, "add"},
         {OP_SUB,      "-",       2, "sub"},
         {OP_MUL,      "*",       2, "mul"},
@@ -18,6 +17,8 @@ lexem_names_numbers_class lexems_names_numbers[OP_COUNT] = {
         {OP_SIN,    "sin",       1},
         {OP_COS,    "cos",       1},
         {OP_POW,      "^",       2},
+
+        
         {OP_FIG_C,    "}",       0},
         {OP_FIG_O,    "{",       0},
         {OP_ROUND_O,  "(",       0},
@@ -35,7 +36,8 @@ lexem_names_numbers_class lexems_names_numbers[OP_COUNT] = {
         {OP_MOVE,   "move",       2, "mov"},
         {OP_PUSH,   "push",       1, "push"},
         {OP_POP ,   "pop",       1, "pop"},
-};
+        {OP_LABEL ,   "",       0, ""},
+}; // TODO: to header
 
 int is_one_char_symbol(char name) {
     int i = 0;
@@ -211,16 +213,6 @@ static int set_type_and_value(double value, types_of_node type, diff_tree_elemen
     element->type = type;
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
 
 static void print_graph_arrows(diff_tree_element * element, FILE * pfile);
 static void print_graph_node(diff_tree_element * element, FILE * pfile, int rank);

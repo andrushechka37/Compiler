@@ -10,6 +10,7 @@ inline int labels_global[LABELS_QUANTITY] = {};
 
 void print_asm_code(diff_tree_element * element);
 diff_tree_element * read_tree();
+int get_free_label(int labels[]);
 
 
 #define IS_ELEM(element, type_of_node, value_of_node) (element->type == type_of_node && \
