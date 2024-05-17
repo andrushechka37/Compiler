@@ -200,7 +200,37 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
 
     if (ELEM_OP_ARG == 2) {
 
+        // TODO: This is not "EQUAL", it's "ASSIGN"
         if (ELEM_OP_NUM == OP_EQUAL) { // NOTE: a strange system
+
+            // TODO: You shouldn't proceed with traversing the tree here,
+            //       instead codegenerate for assign specifically:
+
+            // It can be as follows (in stack based processor):
+            // compile_expression(instruction_stack, assign->rvalue);
+            // register_id reg = assign_empty_register(assign->variable);
+            // generate_push(instruction_stack, reg);
+
+
+            // If you can have arbitrary lvalues (like *(array + b + d) = c):
+
+            // // We consider assignment to look like: *assign->lvalue = assign->rvalue;
+            // // and we also consider variables to be pointers to themselves.
+
+            // compile_expression(ctx->instruction_stack, assign->rvalue);
+            // if (expression_is_variable(assign->lvalue) && ctx_var_has_designated_reg(ctx, assign->lvalue)) {
+            //     register_id reg = ctx_var_get_designated_reg(ctx, assign->variable);
+            //     generate_push(instruction_stack, reg);
+            // } else {
+            //     compile_expression(ctx->instruction_stack, assign->lvalue);
+            //     register_id address = ctx_get_free_register(ctx);
+            //
+            //     generate_pop(instruction_stack, address);
+            //     register_id value = ctx_get_free_register(ctx);
+            //
+            //     generate_pop(instruction_stack, value);
+            //     generate_deferencing_mov(instruction_stack, address, value);
+            // }
 
             make_IR_array(element->right, IR_array);
             make_IR_array(element->left, IR_array);
@@ -220,7 +250,7 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
             END_OF_SWITCH;
         }
 
-        IR_array->data[IR_array->size - 1].countity_of_arg = 2; // TODO: it is costul, fix it, maybe put in set IR
+        IR_array->data[IR_array->size - 1].countity_of_arg = 2; // TODO: it is costil', fix it, maybe put in set IR
 
     } else {
         
@@ -253,7 +283,7 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
                 IR_array->data[IR_array->size - 1].countity_of_arg = 1;
             }
 
-        } else if (ELEM_TYPE == function_class) {
+        } else if (ELEM_TYPE == function_class) { // TODO: PLEASE, make call_function and define_function VERY separate, AS separate AS it gets
             if (element->right == NULL) {
                 set_IR_element(IR_array, function_class, OP_FUNC);
                 
