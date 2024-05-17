@@ -18,7 +18,6 @@ const lexem_names_numbers_class lexems_names_numbers[OP_COUNT] = {
         {OP_COS,    "cos",       1},
         {OP_POW,      "^",       2},
 
-        
         {OP_FIG_C,    "}",       0},
         {OP_FIG_O,    "{",       0},
         {OP_ROUND_O,  "(",       0},

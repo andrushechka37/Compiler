@@ -75,8 +75,8 @@ void dump_IR(IR_elements IR_array[]) {
     fclose(pfile);
 }
 
-#define IF_CASES_LABEL(arg, text)  \
-    case arg:                      \
+#define IF_CASES_LABEL(arg, text)             \
+    case arg:                                 \
         fprintf(pfile, text, element->label); \
         break;
 
@@ -101,6 +101,7 @@ void print_x86_command(IR_element * element, FILE * pfile) {
         } else {
             fprintf(pfile, "r%cx\n", element->first_arg.op_number + 'a');
         }
+
     } else {
 
         if (element->op_number == OP_LABEL) {
@@ -124,11 +125,17 @@ void print_x86_command(IR_element * element, FILE * pfile) {
                     printf("fggdfdgbdfbf");
             }
 
+        } else if (element->op_number == OP_FUNC) {
+
+            if (element->countity_of_arg == 1) {
+                fprintf(pfile, "jmp :%d\n", element->label);
+                fprintf(pfile, "%s:\n", get_variable_name(element->op_number));
+            } else {
+                fprintf(pfile, "call %s\n", get_variable_name(element->op_number));
+            }
+
         } else {
             fprintf(pfile, "%s\n", get_op_x86_name(element->op_number)); // TODO: finish work
-            // get label make jump 
-            // print 
-            // make label
         }
     }
 }
@@ -251,15 +258,18 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
                 set_IR_element(IR_array, function_class, OP_FUNC);
                 
             } else {
+                int jump_over_func_label = get_free_label(labels_global);
+
                 set_IR_element(IR_array, function_class, OP_FUNC);    // 
                 IR_array->data[IR_array->size - 1].countity_of_arg = 1;         // if it is a declaration of func
                                                                                 // it is like a marker that it is a declaration
+                IR_array->data[IR_array->size - 1].label = jump_over_func_label;
 
                 make_IR_array(element->right, IR_array);
 
-                // jmp end
-                // name (maybe do with another class)
-                // :end
+                set_IR_element(IR_array, function_class, OP_LABEL);
+
+                IR_array->data[IR_array->size - 1].label = jump_over_func_label;
             }
 
         } else {
@@ -285,7 +295,6 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
                     CONDITION_CASE(OP_MORE);     // because jump happens in opposite case
                     CONDITION_CASE(OP_LESS); 
                     CONDITION_CASE(OP_NEQUAL); 
-                    
                 
                     default:
                         printf("unknown arg - %d, 985698!!!!!!!\n", element->left->value.operator_info.op_number);
@@ -295,6 +304,7 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
                 IR_array->data[IR_array->size - 1].label = end; // NO
 
                 make_IR_array(element->right, IR_array);
+
                 set_IR_element(IR_array, syntax_class, OP_LABEL);
                 IR_array->data[IR_array->size - 1].label = end;
 

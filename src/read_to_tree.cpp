@@ -68,6 +68,10 @@ static int put_name_to_table(char name[]) {
     return VAR_NUM - 1;
 }
 
+const char * get_variable_name(int number) {
+    return variables_table.table[number].name;
+}
+
 diff_tree_element * read_tree() {
 
     FILE * in_file = fopen("in_program.txt", "r");
