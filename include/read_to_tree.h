@@ -4,7 +4,7 @@
 
 int build_tree(elem_ptr * element, FILE * in_file, elem_ptr * parent);
 
-const int LABELS_QUANTITY = 10;
+const int LABELS_QUANTITY = 20;
 inline variables_info variables_table;
 inline int labels_global[LABELS_QUANTITY] = {};
 

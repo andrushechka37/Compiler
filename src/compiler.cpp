@@ -4,14 +4,6 @@
 #include "../include/read_to_tree.h"
 #include "../include/compiler.h"
 
-// PRINT
-
-// почистить код
-// норм коменты
-// принт
-// комплиляция nasmом
-
-
 
 void set_IR_element(IR_elements * IR_array, types_of_node type, int num) {
 
@@ -76,9 +68,9 @@ void dump_IR(IR_elements IR_array[]) {
     fclose(pfile);
 }
 
-#define IF_CASES_LABEL(arg, text)             \
-    case arg:                                 \
-        fprintf(pfile, text, element->label); \
+#define IF_CASES_LABEL(arg, text)                   \
+    case arg:                                       \
+        fprintf(pfile, text, element->label + 'a'); \
         break;
 
 
@@ -87,11 +79,29 @@ void print_x86_command(IR_element * element, FILE * pfile) {
     if (element->countity_of_arg == 2 && element->op_number != OP_EQUAL) { // for math operations
 
         fprintf(pfile, "\n; start of %s\n", get_op_x86_name(element->op_number)); // TODO: remove hardcode of r12 r13
-        fprintf(pfile, "pop r12\n");
-        fprintf(pfile, "pop r13\n");
-        fprintf(pfile, "%s r13, r12\n", get_op_x86_name(element->op_number));
-        fprintf(pfile, "push r13\n");
+
+        if (element->op_number == OP_MUL) { // TODO: rewrite 
+            
+            fprintf(pfile, "mov r15, rax\n");
+
+            fprintf(pfile, "pop rax\n");
+            fprintf(pfile, "pop r13\n");
+
+            fprintf(pfile, "mul r13\n");
+            fprintf(pfile, "push rax\n");
+
+            fprintf(pfile, "mov rax, r15\n");
+
+        } else {
+
+            fprintf(pfile, "pop r12\n");
+            fprintf(pfile, "pop r13\n");
+            fprintf(pfile, "%s r13, r12\n", get_op_x86_name(element->op_number));
+            fprintf(pfile, "push r13\n");
+        }
+
         fprintf(pfile, "; end of %s\n\n", get_op_x86_name(element->op_number));
+
 
     } else if (element->countity_of_arg == 1 && !(element->op_number == OP_FUNC)) { // it is for push/pop registers or value
 
@@ -100,46 +110,87 @@ void print_x86_command(IR_element * element, FILE * pfile) {
         if (element->first_arg.type == value_class) {
             fprintf(pfile, "%d\n", element->first_arg.op_number);
         } else {
-            fprintf(pfile, "r%cx\n", element->first_arg.op_number + 'a');
+            fprintf(pfile, "r%cx ; %s\n", element->first_arg.op_number + 'a', get_variable_name(element->op_number));
         }
 
     } else {
 
-        if (element->op_number == OP_LABEL) {
-            fprintf(pfile, ":%d\n", element->label);
+        switch (element->op_number) {
 
-        } else if (element->op_number == OP_JUMP) {
-            fprintf(pfile, "jmp :%d\n", element->label);
-        } else if ((OP_MORE <= element->op_number && element->op_number <= OP_EQUAL) || element->op_number == OP_NEQUAL) {
+            case OP_LABEL:
+                fprintf(pfile, "%c:\n", element->label + 'a');
+                break;
 
-            fprintf(pfile, "\n; start of cmp\n"); // TODO: just strange thing
-            fprintf(pfile, "pop r12\n");
-            fprintf(pfile, "pop r13\n");
-            fprintf(pfile, "cmp r13, r12\n");
+            case OP_JUMP:
+                fprintf(pfile, "jmp %c\n", element->label + 'a');
+                break;
 
-            switch (element->op_number) {
+            case OP_MORE:
+            case OP_LESS:
+            case OP_EQUAL:
+            case OP_NEQUAL:
 
-                IF_CASES_LABEL(OP_EQUAL, "jne :%d\n");    
-                IF_CASES_LABEL(OP_MORE,  "jbe :%d\n");    // TODO: fix intendention
-                IF_CASES_LABEL(OP_LESS,  "jae :%d\n"); 
-                IF_CASES_LABEL(OP_NEQUAL, "je :%d\n"); 
+                fprintf(pfile, "\n; start of cmp\n"); // TODO: just strange thing
+                fprintf(pfile, "pop r12\n");
+                fprintf(pfile, "pop r13\n");
+                fprintf(pfile, "cmp r13, r12\n");
 
-                default:
-                    printf("fggdfdgbdfbf");
-            }
-            fprintf(pfile, "; end of cmp\n\n"); // TODO: just strange thing
+                switch (element->op_number) {
 
-        } else if (element->op_number == OP_FUNC) {
+                    IF_CASES_LABEL(OP_EQUAL, "jne %c\n");    
+                    IF_CASES_LABEL(OP_MORE,  "jbe %c\n");    // TODO: fix intendention
+                    IF_CASES_LABEL(OP_LESS,  "jae %c\n"); 
+                    IF_CASES_LABEL(OP_NEQUAL, "je %c\n"); 
 
-            if (element->countity_of_arg == 1) {
-                fprintf(pfile, "jmp :%d\n", element->label);
-                fprintf(pfile, "%s:\n", get_variable_name(element->junk_for_junc));
-            } else {
-                fprintf(pfile, "call %s\n", get_variable_name(element->junk_for_junc));
-            }
+                    default:
+                        printf("fggdfdgbdfbf");
+                }
 
-        } else {
-            fprintf(pfile, "%s\n", get_op_x86_name(element->op_number)); // TODO: finish work
+                fprintf(pfile, "; end of cmp\n\n"); // TODO: just strange thing
+                break;
+
+            case OP_FUNC:
+
+                if (element->countity_of_arg == 1) {
+                    fprintf(pfile, "\n\n; start of declaration of func\n");
+                    fprintf(pfile, "jmp %c\n", element->label + 'a');
+                    fprintf(pfile, "%s:\n", get_variable_name(element->junk_for_junc));
+                } else {
+                    fprintf(pfile, "call %s\n", get_variable_name(element->junk_for_junc));
+                }
+                break;
+            
+            case OP_PRINT:
+
+                fprintf(pfile, "\n\n ;just print-------------\n");
+                
+                fprintf(pfile, "push rax\n");
+
+                fprintf(pfile, "push r%cx\n", element->first_arg.op_number + 'a');
+                fprintf(pfile, "pop rax\n");
+
+                fprintf(pfile, "call print_integer\n");
+
+                fprintf(pfile, "push rsi\n");               //
+                fprintf(pfile, "mov rsi, neg_flag\n");      //
+                fprintf(pfile, "mov byte [rsi], 10\n");     // printf("\n");
+                fprintf(pfile, "call print_char\n");        //
+                fprintf(pfile, "pop rsi\n");                //
+
+                fprintf(pfile, "pop rax\n");
+
+                fprintf(pfile, "\n\n ;just print-------------\n");
+
+                break;
+
+
+
+            default:
+                fprintf(pfile, "%s\n", get_op_x86_name(element->op_number)); // TODO: finish work
+
+
+
+        
         }
     }
 }
@@ -148,13 +199,19 @@ void print_x86_asm(IR_elements * IR_array) {
 
     FILE * pfile = fopen("x86.s", "w");
 
+    fprintf(pfile, "%%include \"andy_lib.s\"\n");
+    fprintf(pfile, "global _start\n");
     fprintf(pfile, "section .text\n");
-    fprintf(pfile, "main:\n");
+    fprintf(pfile, "_start:\n");
 
 
     for (int i = 0; i < IR_array->size; i++) {
         print_x86_command(&(IR_array->data[i]), pfile);
     }
+
+    fprintf(pfile, "mov rax, 60 \n");
+    fprintf(pfile, "mov rdi, 0\n");
+    fprintf(pfile, "syscall\n");
 
     fclose(pfile);
 }
@@ -310,8 +367,6 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
             }
 
 
-            
-
         } else {
 
             if (ELEM_OP_NUM == OP_END) {
@@ -379,7 +434,11 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
                 IR_array->data[IR_array->size - 1].label = end;
 
             } else if (ELEM_OP_NUM == OP_PRINT) {
-                // make stdlib function for it
+
+                set_IR_element(IR_array, syntax_class, OP_PRINT);
+                ELEM_ARGUMENT(first_arg, type) = variable_class;                        //
+                ELEM_ARGUMENT(first_arg, op_number) = element->right->value.number;     // may be put in function
+
             } else if (ELEM_OP_NUM == OP_RET) {
 
                 set_IR_element(IR_array, syntax_class, OP_RET);

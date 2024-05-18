@@ -1,9 +1,120 @@
-:2
-push 1
-push rax
-jne :3
 push 1
 pop rax
-jmp :2
-:4
+push 3
+pop rbx
+push 1
+pop rcx
+push 0
+pop rdx
+call :4
+call :5
 hlt
+
+
+
+:4
+push rbx
+push rbx
+mul
+push 4
+push rax
+mul
+push rcx
+mul
+sub
+pop rdx
+ret
+
+
+
+
+
+
+:5
+push rax
+push 0
+jne :11
+push rbx
+push 0
+push -1
+push rbx
+mul
+push rcx
+div
+pop rgx
+push rgx
+out
+ret
+:12
+push rbx
+push 0
+jne :13
+push rcx
+push 0
+jne :14
+push 9999
+out
+ret
+:14
+:13
+push -1111
+out
+ret
+:11
+push rdx
+push 0
+jbe :15
+push -1
+push rbx
+mul
+push rdx
+sqrt
+add
+push 2
+push rax
+mul
+div
+pop rgx
+push -1
+push rbx
+mul
+push rdx
+sqrt
+sub
+push 2
+push rax
+mul
+div
+pop rhx
+push rgx
+out
+push rhx
+out
+ret
+:15
+push rdx
+push 0
+jne :16
+push -1
+push rbx
+mul
+push 2
+push rax
+mul
+div
+pop rgx
+push rgx
+out
+ret
+:16
+push rdx
+push 0
+jae :17
+push -1111
+out
+ret
+:17
+ret
+
+
+
