@@ -1,13 +1,17 @@
 section .text
 main:
-push 9
-push 7
+:0
+push rax
+push 1
 
-; start of add
+; start of cmp
 pop r12
 pop r13
-add r13, r12
-push r13
-; end of add
+cmp r13, r12
+jne :0
+; end of cmp
 
+push 1
 pop rax
+jmp :0
+:1

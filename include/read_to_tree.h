@@ -23,7 +23,7 @@ const char * get_variable_name(int number);
 
 #define END_OF_SWITCH                                      \
     default:                                               \
-        printf("unknown arg - %d, %s, %s, %d!!!!!!!\n", element->value.operator_info.op_number, __FILE__, __func__, __LINE__);  \
+        printf("\n\nunknown arg - %d, %s, %s, %d!!!!!!!\n\n", element->value.operator_info.op_number, __FILE__, __func__, __LINE__);  \
         break;
 
 

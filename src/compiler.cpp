@@ -4,13 +4,14 @@
 #include "../include/read_to_tree.h"
 #include "../include/compiler.h"
 
-// TODO: make IR with list
-// TODO: comments when generate
-
-// IF
-// WHILE
 // PRINT
-// FUNCTIONS
+
+// почистить код
+// норм коменты
+// принт
+// комплиляция nasmом
+
+
 
 void set_IR_element(IR_elements * IR_array, types_of_node type, int num) {
 
@@ -92,7 +93,7 @@ void print_x86_command(IR_element * element, FILE * pfile) {
         fprintf(pfile, "push r13\n");
         fprintf(pfile, "; end of %s\n\n", get_op_x86_name(element->op_number));
 
-    } else if (element->countity_of_arg == 1) { // it is for push/pop registers or value
+    } else if (element->countity_of_arg == 1 && !(element->op_number == OP_FUNC)) { // it is for push/pop registers or value
 
         fprintf(pfile, "%s ", get_op_x86_name(element->op_number));
 
@@ -107,6 +108,8 @@ void print_x86_command(IR_element * element, FILE * pfile) {
         if (element->op_number == OP_LABEL) {
             fprintf(pfile, ":%d\n", element->label);
 
+        } else if (element->op_number == OP_JUMP) {
+            fprintf(pfile, "jmp :%d\n", element->label);
         } else if ((OP_MORE <= element->op_number && element->op_number <= OP_EQUAL) || element->op_number == OP_NEQUAL) {
 
             fprintf(pfile, "\n; start of cmp\n"); // TODO: just strange thing
@@ -124,14 +127,15 @@ void print_x86_command(IR_element * element, FILE * pfile) {
                 default:
                     printf("fggdfdgbdfbf");
             }
+            fprintf(pfile, "; end of cmp\n\n"); // TODO: just strange thing
 
         } else if (element->op_number == OP_FUNC) {
 
             if (element->countity_of_arg == 1) {
                 fprintf(pfile, "jmp :%d\n", element->label);
-                fprintf(pfile, "%s:\n", get_variable_name(element->op_number));
+                fprintf(pfile, "%s:\n", get_variable_name(element->junk_for_junc));
             } else {
-                fprintf(pfile, "call %s\n", get_variable_name(element->op_number));
+                fprintf(pfile, "call %s\n", get_variable_name(element->junk_for_junc));
             }
 
         } else {
@@ -170,9 +174,6 @@ int main() {
     return 0;
 }
 
-
-// TODO: fix names of macro, they are awful
-
 #define MATH_OP_SWITCH_ARG(num)                     \
     case num:                                       \
     set_IR_element(IR_array, operator_class, num);  \
@@ -181,7 +182,8 @@ int main() {
 
 #define CONDITION_CASE(num)                       \
     case num:                                     \
-    set_IR_element(IR_array, syntax_class, num);
+    set_IR_element(IR_array, syntax_class, num);  \
+    break;
 
 
 #define IS_NULL(element)      \
@@ -205,18 +207,18 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
 
             // TODO: You shouldn't proceed with traversing the tree here,
             //       instead codegenerate for assign specifically:
-
+            //
             // It can be as follows (in stack based processor):
             // compile_expression(instruction_stack, assign->rvalue);
             // register_id reg = assign_empty_register(assign->variable);
             // generate_push(instruction_stack, reg);
-
-
+            //
+            //
             // If you can have arbitrary lvalues (like *(array + b + d) = c):
-
+            //
             // // We consider assignment to look like: *assign->lvalue = assign->rvalue;
             // // and we also consider variables to be pointers to themselves.
-
+            //
             // compile_expression(ctx->instruction_stack, assign->rvalue);
             // if (expression_is_variable(assign->lvalue) && ctx_var_has_designated_reg(ctx, assign->lvalue)) {
             //     register_id reg = ctx_var_get_designated_reg(ctx, assign->variable);
@@ -274,6 +276,7 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
                 ELEM_ARGUMENT(first_arg, op_number) = (int)ELEM_DOUBLE;     // may be put in function
 
                 IR_array->data[IR_array->size - 1].countity_of_arg = 1;
+                
             } else {
 
                 set_IR_element(IR_array, syntax_class, OP_PUSH);
@@ -286,6 +289,7 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
         } else if (ELEM_TYPE == function_class) { // TODO: PLEASE, make call_function and define_function VERY separate, AS separate AS it gets
             if (element->right == NULL) {
                 set_IR_element(IR_array, function_class, OP_FUNC);
+                IR_array->data[IR_array->size - 1].junk_for_junc = element->value.number; // PIZDEZ
                 
             } else {
                 int jump_over_func_label = get_free_label(labels_global);
@@ -293,6 +297,9 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
                 set_IR_element(IR_array, function_class, OP_FUNC);    // 
                 IR_array->data[IR_array->size - 1].countity_of_arg = 1;         // if it is a declaration of func
                                                                                 // it is like a marker that it is a declaration
+
+                IR_array->data[IR_array->size - 1].junk_for_junc = element->value.number;
+                                                                    
                 IR_array->data[IR_array->size - 1].label = jump_over_func_label;
 
                 make_IR_array(element->right, IR_array);
@@ -302,6 +309,9 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
                 IR_array->data[IR_array->size - 1].label = jump_over_func_label;
             }
 
+
+            
+
         } else {
 
             if (ELEM_OP_NUM == OP_END) {
@@ -310,7 +320,39 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
                 make_IR_array(element->right, IR_array);
 
             } else if (ELEM_OP_NUM == OP_WHILE) {
-                // analog to if
+
+
+                int begin = get_free_label(labels_global);
+                int end = get_free_label(labels_global);
+
+                set_IR_element(IR_array, syntax_class, OP_LABEL);
+                IR_array->data[IR_array->size - 1].label = begin;
+
+                make_IR_array(element->left->left, IR_array);
+                make_IR_array(element->left->right, IR_array);
+
+
+                switch (element->left->value.operator_info.op_number) {
+
+                    CONDITION_CASE(OP_EQUAL);    // are changed to opposite commands,
+                    CONDITION_CASE(OP_MORE);     // because jump happens in opposite case
+                    CONDITION_CASE(OP_LESS); 
+                    CONDITION_CASE(OP_NEQUAL); 
+                           
+                    END_OF_SWITCH;
+                }
+
+                make_IR_array(element->right, IR_array);
+
+                set_IR_element(IR_array, syntax_class, OP_JUMP);
+                IR_array->data[IR_array->size - 1].label = begin;
+
+
+                set_IR_element(IR_array, syntax_class, OP_LABEL);
+                IR_array->data[IR_array->size - 1].label = end;
+
+
+
             } else if (ELEM_OP_NUM == OP_IF ) {
 
                 int end = get_free_label(labels_global);
@@ -325,10 +367,8 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
                     CONDITION_CASE(OP_MORE);     // because jump happens in opposite case
                     CONDITION_CASE(OP_LESS); 
                     CONDITION_CASE(OP_NEQUAL); 
-                
-                    default:
-                        printf("unknown arg - %d, 985698!!!!!!!\n", element->left->value.operator_info.op_number);
-                        break;
+                           
+                    END_OF_SWITCH;
                 }
 
                 IR_array->data[IR_array->size - 1].label = end; // NO

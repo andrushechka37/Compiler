@@ -10,6 +10,7 @@ struct IR_argument {
 
 struct IR_element {
     int op_number;
+    int junk_for_junc;
     types_of_node type;
     IR_argument  first_arg;
     int countity_of_arg = 0;

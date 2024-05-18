@@ -36,6 +36,7 @@ const lexem_names_numbers_class lexems_names_numbers[OP_COUNT] = {
         {OP_PUSH,   "push",       1, "push"},
         {OP_POP ,   "pop",       1, "pop"},
         {OP_LABEL ,   "",       0, ""},
+        {OP_JUMP ,   "",       0, ""},
 }; // TODO: to header
 
 int is_one_char_symbol(char name) {
