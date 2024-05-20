@@ -293,7 +293,7 @@ void print_single(diff_tree_element * element, FILE * pfile, diff_tree_element *
                 fprintf(pfile, "ret\n");
 
             } else {
-                printf("unknown arg in print single command\n");
+                printf("unknown arg in print single command %lf\n", element->value.operator_info);
             }
         }
     }

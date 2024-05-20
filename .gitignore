@@ -10,3 +10,5 @@ compile_commands.json
 IR_log.txt
 obj
 .DS_Store
+asm.txt
+x86.s

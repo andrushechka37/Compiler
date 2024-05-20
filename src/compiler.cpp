@@ -396,6 +396,7 @@ void make_IR_array(diff_tree_element * element, IR_elements * IR_array) {
                            
                     END_OF_SWITCH;
                 }
+                IR_array->data[IR_array->size - 1].label = end;
 
                 make_IR_array(element->right, IR_array);
 
