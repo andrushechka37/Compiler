@@ -164,6 +164,8 @@ void print_x86_command(IR_element * element, FILE * pfile) {
 
                 fprintf(pfile, "\n\n ;just print-------------\n");
                 
+
+                fprintf(pfile, "push rbx\n");
                 fprintf(pfile, "push rax\n");
 
                 fprintf(pfile, "push r%cx\n", element->first_arg.op_number + 'a');
@@ -172,12 +174,13 @@ void print_x86_command(IR_element * element, FILE * pfile) {
                 fprintf(pfile, "call print_integer\n");
 
                 fprintf(pfile, "push rsi\n");               //
-                fprintf(pfile, "mov rsi, neg_flag\n");      //
+                fprintf(pfile, "mov rsi, new_line\n");      //
                 fprintf(pfile, "mov byte [rsi], 10\n");     // printf("\n");
                 fprintf(pfile, "call print_char\n");        //
                 fprintf(pfile, "pop rsi\n");                //
 
                 fprintf(pfile, "pop rax\n");
+                fprintf(pfile, "pop rbx\n");
 
                 fprintf(pfile, "\n\n ;just print-------------\n");
 

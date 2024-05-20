@@ -117,6 +117,7 @@ MsgLen      equ $ - Msg
 buffer times 256 db 0
 hex_alphabet: db '0123456789abcdef'
 neg_flag db 0
+new_line db 0
 
 
 
