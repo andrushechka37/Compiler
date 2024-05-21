@@ -5,6 +5,8 @@
 #include "../include/compiler.h"
 
 
+// TODO: numbers of stokes in comments from language to x86, in comments src(cmp 12, 32)
+
 void set_IR_element(IR_elements * IR_array, types_of_node type, int num) {
 
     IR_array->data[IR_array->size].op_number = num;        
